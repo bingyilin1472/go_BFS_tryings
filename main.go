@@ -6,6 +6,31 @@ import (
 	"log"
 )
 
+// 資料格式規劃: 如以下
+// 因為若節點都全名會變很長，譬如由id為 "2021C2_人_產品_操作名稱"，太長
+// 直接把他取一個label名稱，譬如只留下操作名稱
+// 或者像是2021C2_人_產品的label為人 \n 農產品名稱
+
+// 為了讓判斷是否所有操作完成
+// fields: 產品名稱、jsonArray of all types of operations
+
+// 會有一個節點的總圖table，multi-fields
+// nodeID、label、type(tableName)
+// 不同type的node會有該
+// 目前設計node詳細資料是單筆查，點擊節點才會觸發
+// 沒有大量掃描的情況，切換table查指定nodeID不至於太難
+// (若要查某產品下節點，只設置下level，上則為0，0就不觸發if條件上爬)
+
+// {node ID, relationU{} relationD{} , ....}
+// 會有一個serial 作為圖新舊，可以用取最大serial
+// SELECT my_id, col2, col3
+// FROM mytable
+// order by my_id desc
+// limit 1
+
+// 總圖樣式table
+// nodeID、jsonb of nodeID's style config
+
 type NodeRelation struct {
 	// json一般都是小寫開頭，可駝峰
 	RelationU []string `json:"relationU"`
@@ -60,11 +85,15 @@ func GetRelationNodes(relation []string) {
 
 }
 func DownMove(nodeName string, maps map[string]NodeRelation, level int64) {
+	// 建立一個0大小的list，item包含Node str/From str/Distance int
 	queue := make([]Item, 0)
+	// 移動距離初始化為0，置到累積到level要求距離
 	var d int64
 	d = 0
+	// 初始將出發節點nodeName放進來，From root表示非來自他人
 	queue = append(queue, Item{Node: nodeName, From: "root", Distance: d})
 	top := queue[0]
+	// 下面是確認NodeSet沒有該node
 	if _, ok := NodeSet[top.Node]; !ok {
 		NodeSet[top.Node] = void{}
 	}
@@ -75,6 +104,7 @@ func DownMove(nodeName string, maps map[string]NodeRelation, level int64) {
 		}
 	}
 	for len(queue) != 0 {
+		// 這是取出最上面的，然後以位址指派方式，模擬一個queue取出的模式
 		top = queue[0]
 		queue = queue[1:]
 		if top.Distance > level {
@@ -143,7 +173,7 @@ func main() {
 	items = append(items, Item{Node: "NodeName1", From: "NodeName1", Distance: 1})
 	log.Println(items)
 
-	DownMove("node4", maps, 2)
+	DownMove("node4", maps, 10)
 	log.Println(NodeSet)
 	log.Println(EdgeList)
 	for k, _ := range NodeSet {
