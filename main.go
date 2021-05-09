@@ -84,6 +84,55 @@ var EdgeList []Edge
 func GetRelationNodes(relation []string) {
 
 }
+func UpMove(nodeName string, maps map[string]NodeRelation, level int64) {
+	// 建立一個0大小的list，item包含Node str/From str/Distance int
+	queue := make([]Item, 0)
+	// 移動距離初始化為0，置到累積到level要求距離
+	var d int64
+	d = 0
+	// 初始將出發節點nodeName放進來，From root表示非來自他人
+	queue = append(queue, Item{Node: nodeName, From: "root", Distance: d})
+	top := queue[0]
+	// 下面是確認NodeSet沒有該node
+	if _, ok := NodeSet[top.Node]; !ok {
+		NodeSet[top.Node] = void{}
+	}
+	queue = queue[1:]
+	if len(maps[top.Node].RelationU) != 0 {
+		for _, value := range maps[top.Node].RelationU {
+			queue = append(queue, Item{Node: value, From: top.Node, Distance: top.Distance + 1})
+		}
+	}
+	for len(queue) != 0 {
+		// 這是取出最上面的，然後以位址指派方式，模擬一個queue取出的模式
+		top = queue[0]
+		queue = queue[1:]
+		if top.Distance > level {
+			break
+		}
+		EdgeList = append(EdgeList, Edge{Source: top.Node, Target: top.From})
+		if _, ok := NodeSet[top.Node]; !ok {
+			NodeSet[top.Node] = void{}
+		}
+		if len(maps[top.Node].RelationU) != 0 {
+			for _, value := range maps[top.Node].RelationU {
+				queue = append(queue, Item{Node: value, From: top.Node, Distance: top.Distance + 1})
+			}
+		}
+	}
+
+	//queue := make([]int, 0)
+	//// Push to the queue
+	//queue = append(queue, 1)
+	//// Top (just get next element, don't remove it)
+	//x = queue[0]
+	//// Discard top element
+	//queue = queue[1:]
+	//// Is empty ?
+	//if len(queue) == 0 {
+	//	fmt.Println("Queue is empty !")
+	//}
+}
 func DownMove(nodeName string, maps map[string]NodeRelation, level int64) {
 	// 建立一個0大小的list，item包含Node str/From str/Distance int
 	queue := make([]Item, 0)
@@ -173,7 +222,8 @@ func main() {
 	items = append(items, Item{Node: "NodeName1", From: "NodeName1", Distance: 1})
 	log.Println(items)
 
-	DownMove("node4", maps, 10)
+	UpMove("node4", maps, 2)
+	DownMove("node4", maps, 1)
 	log.Println(NodeSet)
 	log.Println(EdgeList)
 	for k, _ := range NodeSet {
