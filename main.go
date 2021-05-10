@@ -28,14 +28,20 @@ import (
 // order by my_id desc
 // limit 1
 
-// 總圖樣式table
-// nodeID、jsonb of nodeID's style config
+// graph 格式會長成下面這個形式，應該會採用jsonb，因為id順序沒有特別重要，會以key-value做indexing
+//{
+//	"node1":{"relationU":[], "relationD":["node2", "node3"]}
+//	"node2":{"relationU":["node1"], "relationD":["node4"]},
+//	"node3":{"relationU":["node1"], "relationD":["node4"]}
+//}
 
 type NodeRelation struct {
 	// json一般都是小寫開頭，可駝峰
 	RelationU []string `json:"relationU"`
 	RelationD []string `json:"relationD"`
 }
+
+// Item : queue裡面的內容，會有當前node，以及他從哪裡來(為了建構正確的edge方向用途)，以及走多遠
 type Item struct {
 	Node     string
 	From     string
@@ -46,26 +52,38 @@ type Edge struct {
 	Target string
 }
 
-//queue := make([]int, 0)
-//// Push to the queue
-//queue = append(queue, 1)
-//// Top (just get next element, don't remove it)
-//x = queue[0]
-//// Discard top element
-//queue = queue[1:]
-//// Is empty ?
-//if len(queue) == 0 {
-//fmt.Println("Queue is empty !")
-//}
+type NodeStyle struct {
+	Id       string      `json:"id"`
+	GroupId  string      `json:"groupId"`
+	Size     int64       `json:"size"`
+	Label    string      `json:"label"`
+	LabelCfg LabelStyle  `json:"labelCfg"`
+	Style    CircleStyle `json:"style"`
+}
+type LabelStyle struct {
+	Style FontStyle
+}
+type FontStyle struct {
+	FontSize int64  `json:"fontSize"`
+	Fill     string `json:"fill"`
+}
 
-//{
-//	"node1":{"relationU":[], "relationD":["node2", "node3"]}
-//	"node2":{"relationU":["node1"], "relationD":["node4"]},
-//	"node3":{"relationU":["node1"], "relationD":["node4"]},
-//	"node4":{"relationU":["node2","node3"], "relationD":["node5", "node6"]},
-//	"node5":{"relationU":["node4"], "relationD":["node7"]},
-//	"node6":{"relationU":["node4"], "relationD":["node7"]},
-//	"node7":{"relationU":["node5","node6"], "relationD":[]}
+type CircleStyle struct {
+	Stroke string `json:"stroke"`
+	Fill   string `json:"fill"`
+}
+
+// list實踐queue的方法
+//queue := make([]int, 0) // 透過make創建一個大小為0的list
+//// Push to the queue
+//queue = append(queue, 1) // 透過append放入queue中，現在放入1，他是逐個遞增append，會得到1|2|3 ...
+//// Top (just get next element, don't remove it)
+//x = queue[0] // 取出來很單純取0就是最前面的(queue是先進先出，FIFO)，indexing 0即可實踐
+//// Discard top element
+//queue = queue[1:] // 從第二個做為list address，前面那個放棄掉，這方面的損耗還好(當然code變巨大時候要注意)
+//// Is empty ?
+//if len(queue) == 0 {  //下面這個可以判斷該list是否為空透過built-in len方法，我們這邊還有distance要素，滿足distance也會結束
+//fmt.Println("Queue is empty !")
 //}
 
 // 會有renderNode，用於最終回傳給前端list
@@ -78,13 +96,21 @@ type Edge struct {
 
 type void struct{}
 
+// NodeSet : 這邊因為我想利用map的索引，確認node存在與否，因此我NodeSet才採用map，所以內容是放空的void{}(聽說他不占空間)
 var NodeSet = make(map[string]void)
 var EdgeList []Edge
+var Style []NodeStyle
 
 func GetRelationNodes(relation []string) {
 
 }
+func GetNodeStyle(styles map[string]NodeStyle) []NodeStyle {
+	for k, _ := range NodeSet {
+		Style = append(Style, styles[k])
+	}
+}
 func UpMove(nodeName string, maps map[string]NodeRelation, level int64) {
+	// 起始點是隨func進來，nodeName
 	// 建立一個0大小的list，item包含Node str/From str/Distance int
 	queue := make([]Item, 0)
 	// 移動距離初始化為0，置到累積到level要求距離
@@ -92,46 +118,46 @@ func UpMove(nodeName string, maps map[string]NodeRelation, level int64) {
 	d = 0
 	// 初始將出發節點nodeName放進來，From root表示非來自他人
 	queue = append(queue, Item{Node: nodeName, From: "root", Distance: d})
+	// 第一次一定會取出，從起始點出發
 	top := queue[0]
-	// 下面是確認NodeSet沒有該node
+	// 下面是確認NodeSet沒有該node，透過comma ok，這邊不對NodeSet做事，因此_，因為在判斷存在與否
 	if _, ok := NodeSet[top.Node]; !ok {
 		NodeSet[top.Node] = void{}
 	}
+	// queue重整address，再第一次取出後，UpMove只看RelationU
 	queue = queue[1:]
+	// 看是否能往上，若沒不進到下面移動迴圈(所有演算法都能以forLoop實踐，這是很重要觀念)
 	if len(maps[top.Node].RelationU) != 0 {
+		// key沒有要用到_，同一個節點取出來的RelationU都是當前距離加1、top.Distance + 1
+		// 另一方面也是From: top.Node
 		for _, value := range maps[top.Node].RelationU {
 			queue = append(queue, Item{Node: value, From: top.Node, Distance: top.Distance + 1})
 		}
 	}
+	// 下面以while方式來持續移動，直到queue為空，裡面也有distance滿足地跳出條件
 	for len(queue) != 0 {
 		// 這是取出最上面的，然後以位址指派方式，模擬一個queue取出的模式
 		top = queue[0]
 		queue = queue[1:]
+		// 這是先判斷，因為當前queue的node都尚未放入之後要用的nodeSet，若發現他有大於distance的就該跳出，因為不會放入
 		if top.Distance > level {
 			break
 		}
+		// UpMove方向是反過來的，From放在Target、Source則是當前Node(top.Node)
 		EdgeList = append(EdgeList, Edge{Source: top.Node, Target: top.From})
+		// 這邊因為我想利用map的索引，確認node存在與否，因此我NodeSet才採用map，所以內容是放空的void{}(聽說他不占空間)
 		if _, ok := NodeSet[top.Node]; !ok {
+			// 若不存在就加入該nodeKey:{}
 			NodeSet[top.Node] = void{}
 		}
+		// 檢查該node是否能繼續往上，添入queue
 		if len(maps[top.Node].RelationU) != 0 {
+			// for窮盡list/array也會有index 0、1、2，不用_
 			for _, value := range maps[top.Node].RelationU {
 				queue = append(queue, Item{Node: value, From: top.Node, Distance: top.Distance + 1})
 			}
 		}
 	}
-
-	//queue := make([]int, 0)
-	//// Push to the queue
-	//queue = append(queue, 1)
-	//// Top (just get next element, don't remove it)
-	//x = queue[0]
-	//// Discard top element
-	//queue = queue[1:]
-	//// Is empty ?
-	//if len(queue) == 0 {
-	//	fmt.Println("Queue is empty !")
-	//}
 }
 func DownMove(nodeName string, maps map[string]NodeRelation, level int64) {
 	// 建立一個0大小的list，item包含Node str/From str/Distance int
@@ -147,6 +173,7 @@ func DownMove(nodeName string, maps map[string]NodeRelation, level int64) {
 		NodeSet[top.Node] = void{}
 	}
 	queue = queue[1:]
+	// DownMove差異在於往下是看RelationD
 	if len(maps[top.Node].RelationD) != 0 {
 		for _, value := range maps[top.Node].RelationD {
 			queue = append(queue, Item{Node: value, From: top.Node, Distance: top.Distance + 1})
@@ -159,33 +186,24 @@ func DownMove(nodeName string, maps map[string]NodeRelation, level int64) {
 		if top.Distance > level {
 			break
 		}
+		// EdgeList，DownMove，source會是From，不用反過來(Up的From則是target)
 		EdgeList = append(EdgeList, Edge{Source: top.From, Target: top.Node})
 		if _, ok := NodeSet[top.Node]; !ok {
 			NodeSet[top.Node] = void{}
 		}
+		// DownMove差異在於往下是看RelationD
 		if len(maps[top.Node].RelationD) != 0 {
 			for _, value := range maps[top.Node].RelationD {
 				queue = append(queue, Item{Node: value, From: top.Node, Distance: top.Distance + 1})
 			}
 		}
 	}
-
-	//queue := make([]int, 0)
-	//// Push to the queue
-	//queue = append(queue, 1)
-	//// Top (just get next element, don't remove it)
-	//x = queue[0]
-	//// Discard top element
-	//queue = queue[1:]
-	//// Is empty ?
-	//if len(queue) == 0 {
-	//	fmt.Println("Queue is empty !")
-	//}
 }
 
 func main() {
 	// {"nodeName" :
 	maps := make(map[string]NodeRelation)
+	styles := make(map[string]NodeStyle)
 	jsonStr := `{
 		"node1":{"relationU":[], "relationD":["node2", "node3"]},
 		"node2":{"relationU":["node1"], "relationD":["node4"]},
@@ -195,6 +213,7 @@ func main() {
 		"node6":{"relationU":["node4"], "relationD":["node7"]},
 		"node7":{"relationU":["node5","node6"], "relationD":[]}
 	}`
+	jsonGraph := ``
 
 	err := json.Unmarshal([]byte(jsonStr), &maps)
 	if err != nil {
@@ -224,8 +243,9 @@ func main() {
 
 	UpMove("node4", maps, 2)
 	DownMove("node4", maps, 1)
-	log.Println(NodeSet)
+	log.Println("This NodeSet: ", NodeSet)
 	log.Println(EdgeList)
+	// range即可窮盡取出nodeKey，不使用value，_
 	for k, _ := range NodeSet {
 		log.Print(k)
 	}
