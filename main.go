@@ -94,6 +94,7 @@ type CircleStyle struct {
 // 另外移動會有UP跟down兩種，都會queue取出的時候產生edge以及node
 // edge會因為UP或down在render edge時候產生反向的target與source
 
+// 佔位用途(不會耗費空間)
 type void struct{}
 
 // NodeSet : 這邊因為我想利用map的索引，確認node存在與否，因此我NodeSet才採用map，所以內容是放空的void{}(聽說他不占空間)
@@ -104,7 +105,7 @@ var Style []NodeStyle
 func GetRelationNodes(relation []string) {
 
 }
-func GetNodeStyle(styles map[string]NodeStyle) []NodeStyle {
+func GetNodeStyle(styles map[string]NodeStyle) {
 	for k, _ := range NodeSet {
 		Style = append(Style, styles[k])
 	}
@@ -204,21 +205,1476 @@ func main() {
 	// {"nodeName" :
 	maps := make(map[string]NodeRelation)
 	styles := make(map[string]NodeStyle)
-	jsonStr := `{
-		"node1":{"relationU":[], "relationD":["node2", "node3"]},
-		"node2":{"relationU":["node1"], "relationD":["node4"]},
-		"node3":{"relationU":["node1"], "relationD":["node4"]},
-		"node4":{"relationU":["node2","node3"], "relationD":["node5", "node6"]},
-		"node5":{"relationU":["node4"], "relationD":["node7"]},
-		"node6":{"relationU":["node4"], "relationD":["node7"]},
-		"node7":{"relationU":["node5","node6"], "relationD":[]}
-	}`
-	jsonGraph := ``
+	//jsonStr := `{
+	//	"node1":{"relationU":[], "relationD":["node2", "node3"]},
+	//	"node2":{"relationU":["node1"], "relationD":["node4"]},
+	//	"node3":{"relationU":["node1"], "relationD":["node4"]},
+	//	"node4":{"relationU":["node2","node3"], "relationD":["node5", "node6"]},
+	//	"node5":{"relationU":["node4"], "relationD":["node7"]},
+	//	"node6":{"relationU":["node4"], "relationD":["node7"]},
+	//	"node7":{"relationU":["node5","node6"], "relationD":[]}
+	//}`
+	jsonGraph := `{
+  "2020-C1_Lu-Ming Rice_Tainan 16": {
+    "relationU": [],
+    "relationD": [
+      "2020-C1_Lu-Ming Rice_Cheng-Po Hsu",
+      "2020-C1_Lu-Ming Rice_Tian-Shang Chang",
+      "2020-C1_Lu-Ming Rice_Jin-Shi Hsieh",
+      "2020-C1_Lu-Ming Rice_Jin-Nan Hsieh"
+    ]
+  },
+  "2020-C1_Lu-Ming Rice_Cheng-Po Hsu": {
+    "relationU": [
+      "2020-C1_Lu-Ming Rice_Tainan 16"
+    ],
+    "relationD": [
+      "2020-C1_Lu-Ming Rice_Cheng-Po Hsu_Site Preparation",
+      "2020-C1_Lu-Ming Rice_Cheng-Po Hsu_Rice Seed Transplantation",
+      "2020-C1_Lu-Ming Rice_Cheng-Po Hsu_Irrigation",
+      "2020-C1_Lu-Ming Rice_Cheng-Po Hsu_Fertilization",
+      "2020-C1_Lu-Ming Rice_Cheng-Po Hsu_Biotic Suppression Operation",
+      "2020-C1_Lu-Ming Rice_Cheng-Po Hsu_Harvesting And Milling",
+      "2020-C1_Lu-Ming Rice_Cheng-Po Hsu_Pesticide And Detecting",
+      "2020-C1_Lu-Ming Rice_Cheng-Po Hsu_Delivering"
+    ]
+  },
+  "2020-C1_Lu-Ming Rice_Tian-Shang Chang": {
+    "relationU": [
+      "2020-C1_Lu-Ming Rice_Tainan 16"
+    ],
+    "relationD": [
+      "2020-C1_Lu-Ming Rice_Tian-Shang Chang_Site Preparation",
+      "2020-C1_Lu-Ming Rice_Tian-Shang Chang_Rice Seed Transplantation",
+      "2020-C1_Lu-Ming Rice_Tian-Shang Chang_Irrigation",
+      "2020-C1_Lu-Ming Rice_Tian-Shang Chang_Fertilization",
+      "2020-C1_Lu-Ming Rice_Tian-Shang Chang_Biotic Suppression Operation",
+      "2020-C1_Lu-Ming Rice_Tian-Shang Chang_Harvesting And Milling",
+      "2020-C1_Lu-Ming Rice_Tian-Shang Chang_Pesticide And Detecting",
+      "2020-C1_Lu-Ming Rice_Tian-Shang Chang_Delivering"
+    ]
+  },
+  "2020-C1_Lu-Ming Rice_Jin-Shi Hsieh": {
+    "relationU": [
+      "2020-C1_Lu-Ming Rice_Tainan 16"
+    ],
+    "relationD": [
+      "2020-C1_Lu-Ming Rice_Jin-Shi Hsieh_Site Preparation",
+      "2020-C1_Lu-Ming Rice_Jin-Shi Hsieh_Rice Seed Transplantation",
+      "2020-C1_Lu-Ming Rice_Jin-Shi Hsieh_Irrigation",
+      "2020-C1_Lu-Ming Rice_Jin-Shi Hsieh_Fertilization",
+      "2020-C1_Lu-Ming Rice_Jin-Shi Hsieh_Biotic Suppression Operation",
+      "2020-C1_Lu-Ming Rice_Jin-Shi Hsieh_Harvesting And Milling",
+      "2020-C1_Lu-Ming Rice_Jin-Shi Hsieh_Pesticide And Detecting",
+      "2020-C1_Lu-Ming Rice_Jin-Shi Hsieh_Delivering"
+    ]
+  },
+  "2020-C1_Lu-Ming Rice_Jin-Nan Hsieh": {
+    "relationU": [
+      "2020-C1_Lu-Ming Rice_Tainan 16"
+    ],
+    "relationD": [
+      "2020-C1_Lu-Ming Rice_Jin-Nan Hsieh_Site Preparation",
+      "2020-C1_Lu-Ming Rice_Jin-Nan Hsieh_Rice Seed Transplantation",
+      "2020-C1_Lu-Ming Rice_Jin-Nan Hsieh_Irrigation",
+      "2020-C1_Lu-Ming Rice_Jin-Nan Hsieh_Fertilization",
+      "2020-C1_Lu-Ming Rice_Jin-Nan Hsieh_Biotic Suppression Operation",
+      "2020-C1_Lu-Ming Rice_Jin-Nan Hsieh_Harvesting And Milling",
+      "2020-C1_Lu-Ming Rice_Jin-Nan Hsieh_Pesticide And Detecting",
+      "2020-C1_Lu-Ming Rice_Jin-Nan Hsieh_Delivering"
+    ]
+  },
+  "2020-C1_Lu-Ming Rice_Cheng-Po Hsu_Site Preparation": {
+    "relationU": [
+      "2020-C1_Lu-Ming Rice_Cheng-Po Hsu"
+    ],
+    "relationD": [
+      "Cheng-Po Hsu_Organic Farm","Tractor"
+    ]
+  },
+  "2020-C1_Lu-Ming Rice_Cheng-Po Hsu_Rice Seed Transplantation": {
+    "relationU": [
+      "2020-C1_Lu-Ming Rice_Cheng-Po Hsu"
+    ],
+    "relationD": [
+      "Cheng-Po Hsu_Organic Farm","Rice Transplanter"
+    ]
+  },
+  "2020-C1_Lu-Ming Rice_Cheng-Po Hsu_Irrigation": {
+    "relationU": [
+      "2020-C1_Lu-Ming Rice_Cheng-Po Hsu"
+    ],
+    "relationD": [
+      "Cheng-Po Hsu_Organic Farm",
+      "Drainage",
+      "Irrigating"
+    ]
+  },
+  "2020-C1_Lu-Ming Rice_Cheng-Po Hsu_Fertilization": {
+    "relationU": [
+      "2020-C1_Lu-Ming Rice_Cheng-Po Hsu"
+    ],
+    "relationD": [
+      "Cheng-Po Hsu_Organic Farm",
+      "Fwusow organic fertilizer 426",
+      "Fwusow special fertilizer for organic cultivation 522",
+      "Fagopyrum Esculentum Seed",
+      "Ear fertilizer"
+    ]
+  },
+  "2020-C1_Lu-Ming Rice_Cheng-Po Hsu_Biotic Suppression Operation": {
+    "relationU": [
+      "2020-C1_Lu-Ming Rice_Cheng-Po Hsu"
+    ],
+    "relationD": [
+      "Cheng-Po Hsu_Organic Farm",
+      "Tea Seed Meal"
+    ]
+  },
+  "2020-C1_Lu-Ming Rice_Cheng-Po Hsu_Harvesting And Milling": {
+    "relationU": [
+      "2020-C1_Lu-Ming Rice_Cheng-Po Hsu"
+    ],
+    "relationD": [
+      "Rice House",
+      "Low Temperature Bin",
+      "Low Temperature Paddy Dryer",
+      "Brown Rice Milling And Package",
+      "Milled Rice And Package",
+      "Paddy complete harvester"
+    ]
+  },
+  "2020-C1_Lu-Ming Rice_Cheng-Po Hsu_Pesticide And Detecting": {
+    "relationU": [
+      "2020-C1_Lu-Ming Rice_Cheng-Po Hsu"
+    ],
+    "relationD": [
+      "Rice House",
+      "Pass"
+    ]
+  },
+  "2020-C1_Lu-Ming Rice_Cheng-Po Hsu_Delivering": {
+    "relationU": [
+      "2020-C1_Lu-Ming Rice_Cheng-Po Hsu"
+    ],
+    "relationD": [
+      "Rice House"
+    ]
+  },
+  "2020-C1_Lu-Ming Rice_Tian-Shang Chang_Site Preparation": {
+    "relationU": [
+      "2020-C1_Lu-Ming Rice_Tian-Shang Chang"
+    ],
+    "relationD": [
+      "Tian-Shang Chang_Organic Farm",
+      "Tractor"
+    ]
+  },
+  "2020-C1_Lu-Ming Rice_Tian-Shang Chang_Rice Seed Transplantation": {
+    "relationU": [
+      "2020-C1_Lu-Ming Rice_Tian-Shang Chang"
+    ],
+    "relationD": [
+      "Tian-Shang Chang_Organic Farm",
+      "Rice Transplanter"
+    ]
+  },
+  "2020-C1_Lu-Ming Rice_Tian-Shang Chang_Irrigation": {
+    "relationU": [
+      "2020-C1_Lu-Ming Rice_Tian-Shang Chang"
+    ],
+    "relationD": [
+      "Tian-Shang Chang_Organic Farm",
+      "Drainage",
+      "Irrigating"
+    ]
+  },
+  "2020-C1_Lu-Ming Rice_Tian-Shang Chang_Fertilization": {
+    "relationU": [
+      "2020-C1_Lu-Ming Rice_Tian-Shang Chang"
+    ],
+    "relationD": [
+      "Tian-Shang Chang_Organic Farm",
+      "Fwusow organic fertilizer 426",
+      "Fwusow special fertilizer for organic cultivation 522",
+      "Fagopyrum Esculentum Seed",
+      "Ear fertilizer"
+    ]
+  },
+  "2020-C1_Lu-Ming Rice_Tian-Shang Chang_Biotic Suppression Operation": {
+    "relationU": [
+      "2020-C1_Lu-Ming Rice_Tian-Shang Chang"
+    ],
+    "relationD": [
+      "Tian-Shang Chang_Organic Farm",
+      "Tea Seed Meal"
+    ]
+  },
+  "2020-C1_Lu-Ming Rice_Tian-Shang Chang_Harvesting And Milling": {
+    "relationU": [
+      "2020-C1_Lu-Ming Rice_Tian-Shang Chang"
+    ],
+    "relationD": [
+      "Rice House",
+      "Low Temperature Bin",
+      "Low Temperature Paddy Dryer",
+      "Brown Rice Milling And Package",
+      "Milled Rice And Package",
+      "Paddy complete harvester"
+    ]
+  },
+  "2020-C1_Lu-Ming Rice_Tian-Shang Chang_Pesticide And Detecting": {
+    "relationU": [
+      "2020-C1_Lu-Ming Rice_Tian-Shang Chang"
+    ],
+    "relationD": [
+      "Rice House",
+      "Pass"
+    ]
+  },
+  "2020-C1_Lu-Ming Rice_Tian-Shang Chang_Delivering": {
+    "relationU": [
+      "2020-C1_Lu-Ming Rice_Tian-Shang Chang"
+    ],
+    "relationD": [
+      "Rice House"
+    ]
+  },
+  "2020-C1_Lu-Ming Rice_Jin-Shi Hsieh_Site Preparation": {
+    "relationU": [
+      "2020-C1_Lu-Ming Rice_Jin-Shi Hsieh"
+    ],
+    "relationD": [
+      "Jin-Shi Hsieh_Organic Farm",
+      "Tractor"
+    ]
+  },
+  "2020-C1_Lu-Ming Rice_Jin-Shi Hsieh_Rice Seed Transplantation": {
+    "relationU": [
+      "2020-C1_Lu-Ming Rice_Jin-Shi Hsieh"
+    ],
+    "relationD": [
+      "Jin-Shi Hsieh_Organic Farm",
+      "Rice Transplanter"
+    ]
+  },
+  "2020-C1_Lu-Ming Rice_Jin-Shi Hsieh_Irrigation": {
+    "relationU": [
+      "2020-C1_Lu-Ming Rice_Jin-Shi Hsieh"
+    ],
+    "relationD": [
+      "Jin-Shi Hsieh_Organic Farm",
+      "Drainage",
+      "Irrigating"
+    ]
+  },
+  "2020-C1_Lu-Ming Rice_Jin-Shi Hsieh_Fertilization": {
+    "relationU": [
+      "2020-C1_Lu-Ming Rice_Jin-Shi Hsieh"
+    ],
+    "relationD": [
+      "Jin-Shi Hsieh_Organic Farm",
+      "Fwusow organic fertilizer 426",
+      "Fwusow special fertilizer for organic cultivation 522",
+      "Fagopyrum Esculentum Seed",
+      "Ear fertilizer"
+    ]
+  },
+  "2020-C1_Lu-Ming Rice_Jin-Shi Hsieh_Biotic Suppression Operation": {
+    "relationU": [
+      "2020-C1_Lu-Ming Rice_Jin-Shi Hsieh"
+    ],
+    "relationD": [
+      "Jin-Shi Hsieh_Organic Farm",
+      "Tea Seed Meal"
+    ]
+  },
+  "2020-C1_Lu-Ming Rice_Jin-Shi Hsieh_Harvesting And Milling": {
+    "relationU": [
+      "2020-C1_Lu-Ming Rice_Jin-Shi Hsieh"
+    ],
+    "relationD": [
+      "Rice House",
+      "Low Temperature Bin",
+      "Low Temperature Paddy Dryer",
+      "Brown Rice Milling And Package",
+      "Milled Rice And Package",
+      "Paddy complete harvester"
+    ]
+  },
+  "2020-C1_Lu-Ming Rice_Jin-Shi Hsieh_Pesticide And Detecting": {
+    "relationU": [
+      "2020-C1_Lu-Ming Rice_Jin-Shi Hsieh"
+    ],
+    "relationD": [
+      "Rice House",
+      "Pass"
+    ]
+  },
+  "2020-C1_Lu-Ming Rice_Jin-Shi Hsieh_Delivering": {
+    "relationU": [
+      "2020-C1_Lu-Ming Rice_Jin-Shi Hsieh"
+    ],
+    "relationD": [
+      "Rice House"
+    ]
+  },
+  "2020-C1_Lu-Ming Rice_Jin-Nan Hsieh_Site Preparation": {
+    "relationU": [
+      "2020-C1_Lu-Ming Rice_Jin-Nan Hsieh"
+    ],
+    "relationD": [
+      "Jin-Nan Hsieh_Organic Farm",
+      "Tractor"
+    ]
+  },
+  "2020-C1_Lu-Ming Rice_Jin-Nan Hsieh_Rice Seed Transplantation": {
+    "relationU": [
+      "2020-C1_Lu-Ming Rice_Jin-Nan Hsieh"
+    ],
+    "relationD": [
+      "Jin-Nan Hsieh_Organic Farm",
+      "Rice Transplanter"
 
-	err := json.Unmarshal([]byte(jsonStr), &maps)
-	if err != nil {
-		log.Println(fmt.Errorf("failed to Unmarshal json str: %s", err.Error()))
+    ]
+  },
+  "2020-C1_Lu-Ming Rice_Jin-Nan Hsieh_Irrigation": {
+    "relationU": [
+      "2020-C1_Lu-Ming Rice_Jin-Nan Hsieh"
+    ],
+    "relationD": [
+      "Jin-Nan Hsieh_Organic Farm",
+      "Drainage",
+      "Irrigating"
+    ]
+  },
+  "2020-C1_Lu-Ming Rice_Jin-Nan Hsieh_Fertilization": {
+    "relationU": [
+      "2020-C1_Lu-Ming Rice_Jin-Nan Hsieh"
+    ],
+    "relationD": [
+      "Jin-Nan Hsieh_Organic Farm",
+      "Fwusow organic fertilizer 426",
+      "Fwusow special fertilizer for organic cultivation 522",
+      "Fagopyrum Esculentum Seed",
+      "Ear fertilizer"
+    ]
+  },
+  "2020-C1_Lu-Ming Rice_Jin-Nan Hsieh_Biotic Suppression Operation": {
+    "relationU": [
+      "2020-C1_Lu-Ming Rice_Jin-Nan Hsieh"
+    ],
+    "relationD": [
+      "Jin-Nan Hsieh_Organic Farm",
+      "Tea Seed Meal"
+    ]
+  },
+  "2020-C1_Lu-Ming Rice_Jin-Nan Hsieh_Harvesting And Milling": {
+    "relationU": [
+      "2020-C1_Lu-Ming Rice_Jin-Nan Hsieh"
+    ],
+    "relationD": [
+      "Rice House",
+      "Low Temperature Bin",
+      "Low Temperature Paddy Dryer",
+      "Brown Rice Milling And Package",
+      "Milled Rice And Package",
+      "Paddy complete harvester"
+    ]
+  },
+  "2020-C1_Lu-Ming Rice_Jin-Nan Hsieh_Pesticide And Detecting": {
+    "relationU": [
+      "2020-C1_Lu-Ming Rice_Jin-Nan Hsieh"
+    ],
+    "relationD": [
+      "Rice House",
+      "Pass"
+    ]
+  },
+  "2020-C1_Lu-Ming Rice_Jin-Nan Hsieh_Delivering": {
+    "relationU": [
+      "2020-C1_Lu-Ming Rice_Jin-Nan Hsieh"
+    ],
+    "relationD": [
+      "Rice House"
+    ]
+  },
+  "Rice House": {
+    "relationU": [
+      "2020-C1_Lu-Ming Rice_Cheng-Po Hsu_Harvesting And Milling",
+      "2020-C1_Lu-Ming Rice_Cheng-Po Hsu_Pesticide And Detecting",
+      "2020-C1_Lu-Ming Rice_Cheng-Po Hsu_Delivering",
+      "2020-C1_Lu-Ming Rice_Tian-Shang Chang_Harvesting And Milling",
+      "2020-C1_Lu-Ming Rice_Tian-Shang Chang_Pesticide And Detecting",
+      "2020-C1_Lu-Ming Rice_Tian-Shang Chang_Delivering",
+      "2020-C1_Lu-Ming Rice_Jin-Shi Hsieh_Harvesting And Milling",
+      "2020-C1_Lu-Ming Rice_Jin-Shi Hsieh_Pesticide And Detecting",
+      "2020-C1_Lu-Ming Rice_Jin-Shi Hsieh_Delivering",
+      "2020-C1_Lu-Ming Rice_Jin-Nan Hsieh_Harvesting And Milling",
+      "2020-C1_Lu-Ming Rice_Jin-Nan Hsieh_Pesticide And Detecting",
+      "2020-C1_Lu-Ming Rice_Jin-Nan Hsieh_Delivering"
+    ],
+    "relationD": []
+  },
+  "Cheng-Po Hsu_Organic Farm": {
+    "relationU": [
+      "2020-C1_Lu-Ming Rice_Cheng-Po Hsu_Site Preparation",
+      "2020-C1_Lu-Ming Rice_Cheng-Po Hsu_Rice Seed Transplantation",
+      "2020-C1_Lu-Ming Rice_Cheng-Po Hsu_Irrigation",
+      "2020-C1_Lu-Ming Rice_Cheng-Po Hsu_Fertilization",
+      "2020-C1_Lu-Ming Rice_Cheng-Po Hsu_Biotic Suppression Operation"
+    ],
+    "relationD": []
+  },
+  "Tian-Shang Chang_Organic Farm": {
+    "relationU": [
+      "2020-C1_Lu-Ming Rice_Tian-Shang Chang_Site Preparation",
+      "2020-C1_Lu-Ming Rice_Tian-Shang Chang_Rice Seed Transplantation",
+      "2020-C1_Lu-Ming Rice_Tian-Shang Chang_Irrigation",
+      "2020-C1_Lu-Ming Rice_Tian-Shang Chang_Fertilization",
+      "2020-C1_Lu-Ming Rice_Tian-Shang Chang_Biotic Suppression Operation"
+    ],
+    "relationD": []
+  },
+  "Jin-Shi Hsieh_Organic Farm": {
+    "relationU": [
+      "2020-C1_Lu-Ming Rice_Jin-Shi Hsieh_Site Preparation",
+      "2020-C1_Lu-Ming Rice_Jin-Shi Hsieh_Rice Seed Transplantation",
+      "2020-C1_Lu-Ming Rice_Jin-Shi Hsieh_Irrigation",
+      "2020-C1_Lu-Ming Rice_Jin-Shi Hsieh_Fertilization",
+      "2020-C1_Lu-Ming Rice_Jin-Shi Hsieh_Biotic Suppression Operation"
+    ],
+    "relationD": []
+  },
+  "Jin-Nan Hsieh_Organic Farm": {
+    "relationU": [
+      "2020-C1_Lu-Ming Rice_Jin-Nan Hsieh_Site Preparation",
+      "2020-C1_Lu-Ming Rice_Jin-Nan Hsieh_Rice Seed Transplantation",
+      "2020-C1_Lu-Ming Rice_Jin-Nan Hsieh_Irrigation",
+      "2020-C1_Lu-Ming Rice_Jin-Nan Hsieh_Fertilization",
+      "2020-C1_Lu-Ming Rice_Jin-Nan Hsieh_Biotic Suppression Operation"
+    ],
+    "relationD": []
+  },
+  "Tractor": {
+    "relationU": [
+      "2020-C1_Lu-Ming Rice_Cheng-Po Hsu_Site Preparation",
+      "2020-C1_Lu-Ming Rice_Tian-Shang Chang_Site Preparation",
+      "2020-C1_Lu-Ming Rice_Jin-Shi Hsieh_Site Preparation",
+      "2020-C1_Lu-Ming Rice_Jin-Nan Hsieh_Site Preparation"
+    ],
+    "relationD": []
+  },
+  "Rice Transplanter": {
+    "relationU": [
+      "2020-C1_Lu-Ming Rice_Cheng-Po Hsu_Rice Seed Transplantation",
+      "2020-C1_Lu-Ming Rice_Tian-Shang Chang_Rice Seed Transplantation",
+      "2020-C1_Lu-Ming Rice_Jin-Shi Hsieh_Rice Seed Transplantation",
+      "2020-C1_Lu-Ming Rice_Jin-Nan Hsieh_Rice Seed Transplantation"
+    ],
+    "relationD": []
+  },
+  "Drainage": {
+    "relationU": [
+      "2020-C1_Lu-Ming Rice_Cheng-Po Hsu_Irrigation",
+      "2020-C1_Lu-Ming Rice_Tian-Shang Chang_Irrigation",
+      "2020-C1_Lu-Ming Rice_Jin-Shi Hsieh_Irrigation",
+      "2020-C1_Lu-Ming Rice_Jin-Nan Hsieh_Irrigation"
+    ],
+    "relationD": []
+  },
+  "Irrigating": {
+    "relationU": [
+      "2020-C1_Lu-Ming Rice_Cheng-Po Hsu_Irrigation",
+      "2020-C1_Lu-Ming Rice_Tian-Shang Chang_Irrigation",
+      "2020-C1_Lu-Ming Rice_Jin-Shi Hsieh_Irrigation",
+      "2020-C1_Lu-Ming Rice_Jin-Nan Hsieh_Irrigation"
+    ],
+    "relationD": []
+  },
+  "Fwusow organic fertilizer 426": {
+    "relationU": [
+      "2020-C1_Lu-Ming Rice_Cheng-Po Hsu_Fertilization",
+      "2020-C1_Lu-Ming Rice_Tian-Shang Chang_Fertilization",
+      "2020-C1_Lu-Ming Rice_Jin-Shi Hsieh_Fertilization",
+      "2020-C1_Lu-Ming Rice_Jin-Nan Hsieh_Fertilization"
+    ],
+    "relationD": []
+  },
+  "Fwusow special fertilizer for organic cultivation 522": {
+    "relationU": [
+      "2020-C1_Lu-Ming Rice_Cheng-Po Hsu_Fertilization",
+      "2020-C1_Lu-Ming Rice_Tian-Shang Chang_Fertilization",
+      "2020-C1_Lu-Ming Rice_Jin-Shi Hsieh_Fertilization",
+      "2020-C1_Lu-Ming Rice_Jin-Nan Hsieh_Fertilization"
+    ],
+    "relationD": []
+  },
+  "Fagopyrum Esculentum Seed": {
+    "relationU": [
+      "2020-C1_Lu-Ming Rice_Cheng-Po Hsu_Fertilization",
+      "2020-C1_Lu-Ming Rice_Tian-Shang Chang_Fertilization",
+      "2020-C1_Lu-Ming Rice_Jin-Shi Hsieh_Fertilization",
+      "2020-C1_Lu-Ming Rice_Jin-Nan Hsieh_Fertilization"
+    ],
+    "relationD": []
+  },
+  "Ear fertilizer": {
+    "relationU": [
+      "2020-C1_Lu-Ming Rice_Cheng-Po Hsu_Fertilization",
+      "2020-C1_Lu-Ming Rice_Tian-Shang Chang_Fertilization",
+      "2020-C1_Lu-Ming Rice_Jin-Shi Hsieh_Fertilization",
+      "2020-C1_Lu-Ming Rice_Jin-Nan Hsieh_Fertilization"
+    ],
+    "relationD": []
+  },
+  "Tea Seed Meal": {
+    "relationU": [
+      "2020-C1_Lu-Ming Rice_Cheng-Po Hsu_Biotic Suppression Operation",
+      "2020-C1_Lu-Ming Rice_Tian-Shang Chang_Biotic Suppression Operation",
+      "2020-C1_Lu-Ming Rice_Jin-Shi Hsieh_Biotic Suppression Operation",
+      "2020-C1_Lu-Ming Rice_Jin-Nan Hsieh_Biotic Suppression Operation"
+    ],
+    "relationD": []
+  },
+  "Low Temperature Bin": {
+    "relationU": [
+      "2020-C1_Lu-Ming Rice_Cheng-Po Hsu_Harvesting And Milling",
+      "2020-C1_Lu-Ming Rice_Tian-Shang Chang_Harvesting And Milling",
+      "2020-C1_Lu-Ming Rice_Jin-Shi Hsieh_Harvesting And Milling",
+      "2020-C1_Lu-Ming Rice_Jin-Nan Hsieh_Harvesting And Milling"
+    ],
+    "relationD": []
+  },
+  "Low Temperature Paddy Dryer": {
+    "relationU": [
+      "2020-C1_Lu-Ming Rice_Cheng-Po Hsu_Harvesting And Milling",
+      "2020-C1_Lu-Ming Rice_Tian-Shang Chang_Harvesting And Milling",
+      "2020-C1_Lu-Ming Rice_Jin-Shi Hsieh_Harvesting And Milling",
+      "2020-C1_Lu-Ming Rice_Jin-Nan Hsieh_Harvesting And Milling"
+    ],
+    "relationD": []
+  },
+  "Brown Rice Milling And Package": {
+    "relationU": [
+      "2020-C1_Lu-Ming Rice_Cheng-Po Hsu_Harvesting And Milling",
+      "2020-C1_Lu-Ming Rice_Tian-Shang Chang_Harvesting And Milling",
+      "2020-C1_Lu-Ming Rice_Jin-Shi Hsieh_Harvesting And Milling",
+      "2020-C1_Lu-Ming Rice_Jin-Nan Hsieh_Harvesting And Milling"
+    ],
+    "relationD": []
+  },
+  "Milled Rice And Package": {
+    "relationU": [
+      "2020-C1_Lu-Ming Rice_Cheng-Po Hsu_Harvesting And Milling",
+      "2020-C1_Lu-Ming Rice_Tian-Shang Chang_Harvesting And Milling",
+      "2020-C1_Lu-Ming Rice_Jin-Shi Hsieh_Harvesting And Milling",
+      "2020-C1_Lu-Ming Rice_Jin-Nan Hsieh_Harvesting And Milling"
+    ],
+    "relationD": []
+  },
+  "Paddy complete harvester": {
+    "relationU": [
+      "2020-C1_Lu-Ming Rice_Cheng-Po Hsu_Harvesting And Milling",
+      "2020-C1_Lu-Ming Rice_Tian-Shang Chang_Harvesting And Milling",
+      "2020-C1_Lu-Ming Rice_Jin-Shi Hsieh_Harvesting And Milling",
+      "2020-C1_Lu-Ming Rice_Jin-Nan Hsieh_Harvesting And Milling"
+    ],
+    "relationD": []
+  },
+  "Pass": {
+    "relationU": [
+      "2020-C1_Lu-Ming Rice_Cheng-Po Hsu_Pesticide And Detecting",
+      "2020-C1_Lu-Ming Rice_Tian-Shang Chang_Pesticide And Detecting",
+      "2020-C1_Lu-Ming Rice_Jin-Shi Hsieh_Pesticide And Detecting",
+      "2020-C1_Lu-Ming Rice_Jin-Nan Hsieh_Pesticide And Detecting"
+    ],
+    "relationD": []
+  }
+}`
+	jsonStyle := `{
+  "2020-C1_Lu-Ming Rice_Tainan 16": {
+    "id": "2020-C1_Lu-Ming Rice_Tainan 16",
+    "groupId": "product",
+    "size": 170,
+    "label": "2020-C1\nLu-Ming Rice\nTainan 16",
+    "labelCfg": {
+      "style": {
+        "fontSize": 16,
+        "fill": "#ffffff"
+      }
+    },
+    "style": {
+      "stroke": "#413960",
+      "fill": "#413960"
+    }
+  },
+  "2020-C1_Lu-Ming Rice_Cheng-Po Hsu": {
+    "id": "2020-C1_Lu-Ming Rice_Cheng-Po Hsu",
+    "groupId": "product",
+    "size": 170,
+    "label": "2020-C1\nLu-Ming Rice\nCheng-Po Hsu",
+    "labelCfg": {
+      "style": {
+        "fontSize": 16
+      }
+    },
+    "style": {
+      "stroke": "#413960",
+      "fill": "#fe917d"
+    }
+  },
+  "2020-C1_Lu-Ming Rice_Tian-Shang Chang": {
+    "id": "2020-C1_Lu-Ming Rice_Tian-Shang Chang",
+    "groupId": "product",
+    "size": 170,
+    "label": "2020-C1\nLu-Ming Rice\nTian-Shang Chang",
+    "labelCfg": {
+      "style": {
+        "fontSize": 16
+      }
+    },
+    "style": {
+      "stroke": "#413960",
+      "fill": "#fe917d"
+    }
+  },
+  "2020-C1_Lu-Ming Rice_Jin-Shi Hsieh": {
+    "id": "2020-C1_Lu-Ming Rice_Jin-Shi Hsieh",
+    "groupId": "product",
+    "size": 170,
+    "label": "2020-C1\nLu-Ming Rice\nJin-Shi Hsieh",
+    "labelCfg": {
+      "style": {
+        "fontSize": 16
+      }
+    },
+    "style": {
+      "stroke": "#413960",
+      "fill": "#fe917d"
+    }
+  },
+  "2020-C1_Lu-Ming Rice_Jin-Nan Hsieh": {
+    "id": "2020-C1_Lu-Ming Rice_Jin-Nan Hsieh",
+    "groupId": "product",
+    "size": 170,
+    "label": "2020-C1\nLu-Ming Rice\nJin-Nan Hsieh",
+    "labelCfg": {
+      "style": {
+        "fontSize": 16
+      }
+    },
+    "style": {
+      "stroke": "#413960",
+      "fill": "#fe917d"
+    }
+  },
+  "2020-C1_Lu-Ming Rice_Cheng-Po Hsu_Site Preparation": {
+    "id": "2020-C1_Lu-Ming Rice_Cheng-Po Hsu_Site Preparation",
+    "groupId": "operation",
+    "size": 170,
+    "label": "Site Preparation",
+    "labelCfg": {
+      "style": {
+        "fontSize": 16
+      }
+    },
+    "style": {
+      "stroke": "#413960",
+      "fill": "#85d0a0"
+    }
+  },
+  "2020-C1_Lu-Ming Rice_Cheng-Po Hsu_Rice Seed Transplantation": {
+    "id": "2020-C1_Lu-Ming Rice_Cheng-Po Hsu_Rice Seed Transplantation",
+    "groupId": "operation",
+    "size": 170,
+    "label": "Rice Seed\n Transplantation",
+    "labelCfg": {
+      "style": {
+        "fontSize": 16
+      }
+    },
+    "style": {
+      "stroke": "#413960",
+      "fill": "#85d0a0"
+    }
+  },
+  "2020-C1_Lu-Ming Rice_Cheng-Po Hsu_Irrigation": {
+    "id": "2020-C1_Lu-Ming Rice_Cheng-Po Hsu_Irrigation",
+    "groupId": "operation",
+    "size": 170,
+    "label": "Irrigation",
+    "labelCfg": {
+      "style": {
+        "fontSize": 16
+      }
+    },
+    "style": {
+      "stroke": "#413960",
+      "fill": "#85d0a0"
+    }
+  },
+  "2020-C1_Lu-Ming Rice_Cheng-Po Hsu_Fertilization": {
+    "id": "2020-C1_Lu-Ming Rice_Cheng-Po Hsu_Fertilization",
+    "groupId": "operation",
+    "size": 170,
+    "label": "Fertilization",
+    "labelCfg": {
+      "style": {
+        "fontSize": 16
+      }
+    },
+    "style": {
+      "stroke": "#413960",
+      "fill": "#85d0a0"
+    }
+  },
+  "2020-C1_Lu-Ming Rice_Cheng-Po Hsu_Biotic Suppression Operation": {
+    "id": "2020-C1_Lu-Ming Rice_Cheng-Po Hsu_Biotic Suppression Operation",
+    "groupId": "operation",
+    "size": 170,
+    "label": "Biotic\n Suppression Operation",
+    "labelCfg": {
+      "style": {
+        "fontSize": 16
+      }
+    },
+    "style": {
+      "stroke": "#413960",
+      "fill": "#85d0a0"
+    }
+  },
+  "2020-C1_Lu-Ming Rice_Cheng-Po Hsu_Harvesting And Milling": {
+    "id": "2020-C1_Lu-Ming Rice_Cheng-Po Hsu_Harvesting And Milling",
+    "groupId": "operation",
+    "size": 170,
+    "label": "Harvesting\n And Milling",
+    "labelCfg": {
+      "style": {
+        "fontSize": 16
+      }
+    },
+    "style": {
+      "stroke": "#413960",
+      "fill": "#85d0a0"
+    }
+  },
+  "2020-C1_Lu-Ming Rice_Cheng-Po Hsu_Pesticide And Detecting": {
+    "id": "2020-C1_Lu-Ming Rice_Cheng-Po Hsu_Pesticide And Detecting",
+    "groupId": "operation",
+    "size": 170,
+    "label": "Pesticide\n And Detecting",
+    "labelCfg": {
+      "style": {
+        "fontSize": 16
+      }
+    },
+    "style": {
+      "stroke": "#413960",
+      "fill": "#85d0a0"
+    }
+  },
+  "2020-C1_Lu-Ming Rice_Cheng-Po Hsu_Delivering": {
+    "id": "2020-C1_Lu-Ming Rice_Cheng-Po Hsu_Delivering",
+    "groupId": "operation",
+    "size": 170,
+    "label": "Delivering",
+    "labelCfg": {
+      "style": {
+        "fontSize": 16
+      }
+    },
+    "style": {
+      "stroke": "#413960",
+      "fill": "#85d0a0"
+    }
+  },
+  "2020-C1_Lu-Ming Rice_Tian-Shang Chang_Site Preparation": {
+    "id": "2020-C1_Lu-Ming Rice_Tian-Shang Chang_Site Preparation",
+    "groupId": "operation",
+    "size": 170,
+    "label": "Site Preparation",
+    "labelCfg": {
+      "style": {
+        "fontSize": 16
+      }
+    },
+    "style": {
+      "stroke": "#413960",
+      "fill": "#85d0a0"
+    }
+  },
+  "2020-C1_Lu-Ming Rice_Tian-Shang Chang_Rice Seed Transplantation": {
+    "id": "2020-C1_Lu-Ming Rice_Tian-Shang Chang_Rice Seed Transplantation",
+    "groupId": "operation",
+    "size": 170,
+    "label": "Rice Seed\n Transplantation",
+    "labelCfg": {
+      "style": {
+        "fontSize": 16
+      }
+    },
+    "style": {
+      "stroke": "#413960",
+      "fill": "#85d0a0"
+    }
+  },
+  "2020-C1_Lu-Ming Rice_Tian-Shang Chang_Irrigation": {
+    "id": "2020-C1_Lu-Ming Rice_Tian-Shang Chang_Irrigation",
+    "groupId": "operation",
+    "size": 170,
+    "label": "Irrigation",
+    "labelCfg": {
+      "style": {
+        "fontSize": 16
+      }
+    },
+    "style": {
+      "stroke": "#413960",
+      "fill": "#85d0a0"
+    }
+  },
+  "2020-C1_Lu-Ming Rice_Tian-Shang Chang_Fertilization": {
+    "id": "2020-C1_Lu-Ming Rice_Tian-Shang Chang_Fertilization",
+    "groupId": "operation",
+    "size": 170,
+    "label": "Fertilization",
+    "labelCfg": {
+      "style": {
+        "fontSize": 16
+      }
+    },
+    "style": {
+      "stroke": "#413960",
+      "fill": "#85d0a0"
+    }
+  },
+  "2020-C1_Lu-Ming Rice_Tian-Shang Chang_Biotic Suppression Operation": {
+    "id": "2020-C1_Lu-Ming Rice_Tian-Shang Chang_Biotic Suppression Operation",
+    "groupId": "operation",
+    "size": 170,
+    "label": "Biotic\n Suppression Operation",
+    "labelCfg": {
+      "style": {
+        "fontSize": 16
+      }
+    },
+    "style": {
+      "stroke": "#413960",
+      "fill": "#85d0a0"
+    }
+  },
+  "2020-C1_Lu-Ming Rice_Tian-Shang Chang_Harvesting And Milling": {
+    "id": "2020-C1_Lu-Ming Rice_Tian-Shang Chang_Harvesting And Milling",
+    "groupId": "operation",
+    "size": 170,
+    "label": "Harvesting\n And Milling",
+    "labelCfg": {
+      "style": {
+        "fontSize": 16
+      }
+    },
+    "style": {
+      "stroke": "#413960",
+      "fill": "#85d0a0"
+    }
+  },
+  "2020-C1_Lu-Ming Rice_Tian-Shang Chang_Pesticide And Detecting": {
+    "id": "2020-C1_Lu-Ming Rice_Tian-Shang Chang_Pesticide And Detecting",
+    "groupId": "operation",
+    "size": 170,
+    "label": "Pesticide\n And Detecting",
+    "labelCfg": {
+      "style": {
+        "fontSize": 16
+      }
+    },
+    "style": {
+      "stroke": "#413960",
+      "fill": "#85d0a0"
+    }
+  },
+  "2020-C1_Lu-Ming Rice_Tian-Shang Chang_Delivering": {
+    "id": "2020-C1_Lu-Ming Rice_Tian-Shang Chang_Delivering",
+    "groupId": "operation",
+    "size": 170,
+    "label": "Delivering",
+    "labelCfg": {
+      "style": {
+        "fontSize": 16
+      }
+    },
+    "style": {
+      "stroke": "#413960",
+      "fill": "#85d0a0"
+    }
+  },
+  "2020-C1_Lu-Ming Rice_Jin-Shi Hsieh_Site Preparation": {
+    "id": "2020-C1_Lu-Ming Rice_Jin-Shi Hsieh_Site Preparation",
+    "groupId": "operation",
+    "size": 170,
+    "label": "Site Preparation",
+    "labelCfg": {
+      "style": {
+        "fontSize": 16
+      }
+    },
+    "style": {
+      "stroke": "#413960",
+      "fill": "#85d0a0"
+    }
+  },
+  "2020-C1_Lu-Ming Rice_Jin-Shi Hsieh_Rice Seed Transplantation": {
+    "id": "2020-C1_Lu-Ming Rice_Jin-Shi Hsieh_Rice Seed Transplantation",
+    "groupId": "operation",
+    "size": 170,
+    "label": "Rice Seed\n Transplantation",
+    "labelCfg": {
+      "style": {
+        "fontSize": 16
+      }
+    },
+    "style": {
+      "stroke": "#413960",
+      "fill": "#85d0a0"
+    }
+  },
+  "2020-C1_Lu-Ming Rice_Jin-Shi Hsieh_Irrigation": {
+    "id": "2020-C1_Lu-Ming Rice_Jin-Shi Hsieh_Irrigation",
+    "groupId": "operation",
+    "size": 170,
+    "label": "Irrigation",
+    "labelCfg": {
+      "style": {
+        "fontSize": 16
+      }
+    },
+    "style": {
+      "stroke": "#413960",
+      "fill": "#85d0a0"
+    }
+  },
+  "2020-C1_Lu-Ming Rice_Jin-Shi Hsieh_Fertilization": {
+    "id": "2020-C1_Lu-Ming Rice_Jin-Shi Hsieh_Fertilization",
+    "groupId": "operation",
+    "size": 170,
+    "label": "Fertilization",
+    "labelCfg": {
+      "style": {
+        "fontSize": 16
+      }
+    },
+    "style": {
+      "stroke": "#413960",
+      "fill": "#85d0a0"
+    }
+  },
+  "2020-C1_Lu-Ming Rice_Jin-Shi Hsieh_Biotic Suppression Operation": {
+    "id": "2020-C1_Lu-Ming Rice_Jin-Shi Hsieh_Biotic Suppression Operation",
+    "groupId": "operation",
+    "size": 170,
+    "label": "Biotic\n Suppression Operation",
+    "labelCfg": {
+      "style": {
+        "fontSize": 16
+      }
+    },
+    "style": {
+      "stroke": "#413960",
+      "fill": "#85d0a0"
+    }
+  },
+  "2020-C1_Lu-Ming Rice_Jin-Shi Hsieh_Harvesting And Milling": {
+    "id": "2020-C1_Lu-Ming Rice_Jin-Shi Hsieh_Harvesting And Milling",
+    "groupId": "operation",
+    "size": 170,
+    "label": "Harvesting\n And Milling",
+    "labelCfg": {
+      "style": {
+        "fontSize": 16
+      }
+    },
+    "style": {
+      "stroke": "#413960",
+      "fill": "#85d0a0"
+    }
+  },
+  "2020-C1_Lu-Ming Rice_Jin-Shi Hsieh_Pesticide And Detecting": {
+    "id": "2020-C1_Lu-Ming Rice_Jin-Shi Hsieh_Pesticide And Detecting",
+    "groupId": "operation",
+    "size": 170,
+    "label": "Pesticide\n And Detecting",
+    "labelCfg": {
+      "style": {
+        "fontSize": 16
+      }
+    },
+    "style": {
+      "stroke": "#413960",
+      "fill": "#85d0a0"
+    }
+  },
+  "2020-C1_Lu-Ming Rice_Jin-Shi Hsieh_Delivering": {
+    "id": "2020-C1_Lu-Ming Rice_Jin-Shi Hsieh_Delivering",
+    "groupId": "operation",
+    "size": 170,
+    "label": "Delivering",
+    "labelCfg": {
+      "style": {
+        "fontSize": 16
+      }
+    },
+    "style": {
+      "stroke": "#413960",
+      "fill": "#85d0a0"
+    }
+  },
+  "2020-C1_Lu-Ming Rice_Jin-Nan Hsieh_Site Preparation": {
+    "id": "2020-C1_Lu-Ming Rice_Jin-Nan Hsieh_Site Preparation",
+    "groupId": "operation",
+    "size": 170,
+    "label": "Site Preparation",
+    "labelCfg": {
+      "style": {
+        "fontSize": 16
+      }
+    },
+    "style": {
+      "stroke": "#413960",
+      "fill": "#85d0a0"
+    }
+  },
+  "2020-C1_Lu-Ming Rice_Jin-Nan Hsieh_Rice Seed Transplantation": {
+    "id": "2020-C1_Lu-Ming Rice_Jin-Nan Hsieh_Rice Seed Transplantation",
+    "groupId": "operation",
+    "size": 170,
+    "label": "Rice Seed\n Transplantation",
+    "labelCfg": {
+      "style": {
+        "fontSize": 16
+      }
+    },
+    "style": {
+      "stroke": "#413960",
+      "fill": "#85d0a0"
+    }
+  },
+  "2020-C1_Lu-Ming Rice_Jin-Nan Hsieh_Irrigation": {
+    "id": "2020-C1_Lu-Ming Rice_Jin-Nan Hsieh_Irrigation",
+    "groupId": "operation",
+    "size": 170,
+    "label": "Irrigation",
+    "labelCfg": {
+      "style": {
+        "fontSize": 16
+      }
+    },
+    "style": {
+      "stroke": "#413960",
+      "fill": "#85d0a0"
+    }
+  },
+  "2020-C1_Lu-Ming Rice_Jin-Nan Hsieh_Fertilization": {
+    "id": "2020-C1_Lu-Ming Rice_Jin-Nan Hsieh_Fertilization",
+    "groupId": "operation",
+    "size": 170,
+    "label": "Fertilization",
+    "labelCfg": {
+      "style": {
+        "fontSize": 16
+      }
+    },
+    "style": {
+      "stroke": "#413960",
+      "fill": "#85d0a0"
+    }
+  },
+  "2020-C1_Lu-Ming Rice_Jin-Nan Hsieh_Biotic Suppression Operation": {
+    "id": "2020-C1_Lu-Ming Rice_Jin-Nan Hsieh_Biotic Suppression Operation",
+    "groupId": "operation",
+    "size": 170,
+    "label": "Biotic\n Suppression Operation",
+    "labelCfg": {
+      "style": {
+        "fontSize": 16
+      }
+    },
+    "style": {
+      "stroke": "#413960",
+      "fill": "#85d0a0"
+    }
+  },
+  "2020-C1_Lu-Ming Rice_Jin-Nan Hsieh_Harvesting And Milling": {
+    "id": "2020-C1_Lu-Ming Rice_Jin-Nan Hsieh_Harvesting And Milling",
+    "groupId": "operation",
+    "size": 170,
+    "label": "Harvesting\n And Milling",
+    "labelCfg": {
+      "style": {
+        "fontSize": 16
+      }
+    },
+    "style": {
+      "stroke": "#413960",
+      "fill": "#85d0a0"
+    }
+  },
+  "2020-C1_Lu-Ming Rice_Jin-Nan Hsieh_Pesticide And Detecting": {
+    "id": "2020-C1_Lu-Ming Rice_Jin-Nan Hsieh_Pesticide And Detecting",
+    "groupId": "operation",
+    "size": 170,
+    "label": "Pesticide\n And Detecting",
+    "labelCfg": {
+      "style": {
+        "fontSize": 16
+      }
+    },
+    "style": {
+      "stroke": "#413960",
+      "fill": "#85d0a0"
+    }
+  },
+  "2020-C1_Lu-Ming Rice_Jin-Nan Hsieh_Delivering": {
+    "id": "2020-C1_Lu-Ming Rice_Jin-Nan Hsieh_Delivering",
+    "groupId": "operation",
+    "size": 170,
+    "label": "Delivering",
+    "labelCfg": {
+      "style": {
+        "fontSize": 16
+      }
+    },
+    "style": {
+      "stroke": "#413960",
+      "fill": "#85d0a0"
+    }
+  },
+  "Rice House": {
+    "id": "Rice House",
+    "groupId": "farm",
+    "size": 170,
+    "label": "Rice House",
+    "labelCfg": {
+      "style": {
+        "fontSize": 16
+      }
+    },
+    "style": {
+      "stroke": "#413960",
+      "fill": "#ffffff"
+    }
+  },
+  "Cheng-Po Hsu_Organic Farm": {
+    "id": "Cheng-Po Hsu_Organic Farm",
+    "groupId": "farm",
+    "size": 170,
+    "label": "Cheng-Po Hsu\nOrganic Farm",
+    "labelCfg": {
+      "style": {
+        "fontSize": 16
+      }
+    },
+    "style": {
+      "stroke": "#413960",
+      "fill": "#ffffff"
+    }
+  },
+  "Tian-Shang Chang_Organic Farm": {
+    "id": "Tian-Shang Chang_Organic Farm",
+    "groupId": "farm",
+    "size": 170,
+    "label": "Tian-Shang Chang\nOrganic Farm",
+    "labelCfg": {
+      "style": {
+        "fontSize": 16
+      }
+    },
+    "style": {
+      "stroke": "#413960",
+      "fill": "#ffffff"
+    }
+  },
+  "Jin-Shi Hsieh_Organic Farm": {
+    "id": "Jin-Shi Hsieh_Organic Farm",
+    "groupId": "farm",
+    "size": 170,
+    "label": "Jin-Shi Hsieh\nOrganic Farm",
+    "labelCfg": {
+      "style": {
+        "fontSize": 16
+      }
+    },
+    "style": {
+      "stroke": "#413960",
+      "fill": "#ffffff"
+    }
+  },
+  "Jin-Nan Hsieh_Organic Farm": {
+    "id": "Jin-Nan Hsieh_Organic Farm",
+    "groupId": "farm",
+    "size": 170,
+    "label": "Jin-Nan Hsieh\nOrganic Farm",
+    "labelCfg": {
+      "style": {
+        "fontSize": 16
+      }
+    },
+    "style": {
+      "stroke": "#413960",
+      "fill": "#ffffff"
+    }
+  },
+  "Tractor": {
+    "id": "Tractor",
+    "groupId": "detail",
+    "size": 170,
+    "label": "Tractor",
+    "labelCfg": {
+      "style": {
+        "fontSize": 16,
+        "fill": "#ffffff"
+      }
+    },
+    "style": {
+      "stroke": "#413960",
+      "fill": "#6154a5"
+    }
+  },
+  "Rice Transplanter": {
+    "id": "Rice Transplanter",
+    "groupId": "detail",
+    "size": 170,
+    "label": "Rice \nTransplanter",
+    "labelCfg": {
+      "style": {
+        "fontSize": 16,
+        "fill": "#ffffff"
+      }
+    },
+    "style": {
+      "stroke": "#413960",
+      "fill": "#6154a5"
+    }
+  },
+  "Drainage": {
+    "id": "Drainage",
+    "groupId": "detail",
+    "size": 170,
+    "label": "Drainage",
+    "labelCfg": {
+      "style": {
+        "fontSize": 16,
+        "fill": "#ffffff"
+      }
+    },
+    "style": {
+      "stroke": "#413960",
+      "fill": "#6154a5"
+    }
+  },
+  "Irrigating": {
+    "id": "Irrigating",
+    "groupId": "detail",
+    "size": 170,
+    "label": "Irrigating",
+    "labelCfg": {
+      "style": {
+        "fontSize": 16,
+        "fill": "#ffffff"
+      }
+    },
+    "style": {
+      "stroke": "#413960",
+      "fill": "#6154a5"
+    }
+  },
+  "Fwusow organic fertilizer 426": {
+    "id": "Fwusow organic fertilizer 426",
+    "groupId": "detail",
+    "size": 170,
+    "label": "Fwusow organic\n fertilizer 426",
+    "labelCfg": {
+      "style": {
+        "fontSize": 16,
+        "fill": "#ffffff"
+      }
+    },
+    "style": {
+      "stroke": "#413960",
+      "fill": "#6154a5"
+    }
+  },
+  "Fwusow special fertilizer for organic cultivation 522": {
+    "id": "Fwusow special fertilizer for organic cultivation 522",
+    "groupId": "detail",
+    "size": 170,
+    "label": "Fwusow special\n fertilizer for\n organic cultivation\n 522",
+    "labelCfg": {
+      "style": {
+        "fontSize": 16,
+        "fill": "#ffffff"
+      }
+    },
+    "style": {
+      "stroke": "#413960",
+      "fill": "#6154a5"
+    }
+  },
+  "Fagopyrum Esculentum Seed": {
+    "id": "Fagopyrum Esculentum Seed",
+    "groupId": "detail",
+    "size": 170,
+    "label": "Fagopyrum \nEsculentum Seed",
+    "labelCfg": {
+      "style": {
+        "fontSize": 16,
+        "fill": "#ffffff"
+      }
+    },
+    "style": {
+      "stroke": "#413960",
+      "fill": "#6154a5"
+    }
+  },
+  "Ear fertilizer": {
+    "id": "Ear fertilizer",
+    "groupId": "detail",
+    "size": 170,
+    "label": "Ear fertilizer",
+    "labelCfg": {
+      "style": {
+        "fontSize": 16,
+        "fill": "#ffffff"
+      }
+    },
+    "style": {
+      "stroke": "#413960",
+      "fill": "#6154a5"
+    }
+  },
+  "Tea Seed Meal": {
+    "id": "Tea Seed Meal",
+    "groupId": "detail",
+    "size": 170,
+    "label": "Tea Seed Meal",
+    "labelCfg": {
+      "style": {
+        "fontSize": 16,
+        "fill": "#ffffff"
+      }
+    },
+    "style": {
+      "stroke": "#413960",
+      "fill": "#6154a5"
+    }
+  },
+  "Low Temperature Bin": {
+    "id": "Low Temperature Bin",
+    "groupId": "detail",
+    "size": 170,
+    "label": "Low Temperature\n Bin",
+    "labelCfg": {
+      "style": {
+        "fontSize": 16,
+        "fill": "#ffffff"
+      }
+    },
+    "style": {
+      "stroke": "#413960",
+      "fill": "#6154a5"
+    }
+  },
+  "Low Temperature Paddy Dryer": {
+    "id": "Low Temperature Paddy Dryer",
+    "groupId": "detail",
+    "size": 170,
+    "label": "Low Temperature\n Paddy Dryer",
+    "labelCfg": {
+      "style": {
+        "fontSize": 16,
+        "fill": "#ffffff"
+      }
+    },
+    "style": {
+      "stroke": "#413960",
+      "fill": "#6154a5"
+    }
+  },
+  "Brown Rice Milling And Package": {
+    "id": "Brown Rice Milling And Package",
+    "groupId": "detail",
+    "size": 170,
+    "label": "Brown Rice \nMilling And\n Package",
+    "labelCfg": {
+      "style": {
+        "fontSize": 16,
+        "fill": "#ffffff"
+      }
+    },
+    "style": {
+      "stroke": "#413960",
+      "fill": "#6154a5"
+    }
+  },
+  "Milled Rice And Package": {
+    "id": "Milled Rice And Package",
+    "groupId": "detail",
+    "size": 170,
+    "label": "Milled Rice \nAnd Package",
+    "labelCfg": {
+      "style": {
+        "fontSize": 16,
+        "fill": "#ffffff"
+      }
+    },
+    "style": {
+      "stroke": "#413960",
+      "fill": "#6154a5"
+    }
+  },
+  "Paddy complete harvester": {
+    "id": "Paddy complete harvester",
+    "groupId": "detail",
+    "size": 170,
+    "label": "Paddy complete\n harvester",
+    "labelCfg": {
+      "style": {
+        "fontSize": 16,
+        "fill": "#ffffff"
+      }
+    },
+    "style": {
+      "stroke": "#413960",
+      "fill": "#6154a5"
+    }
+  },
+  "Pass": {
+    "id": "Pass",
+    "groupId": "detail",
+    "size": 170,
+    "label": "Pass",
+    "labelCfg": {
+      "style": {
+        "fontSize": 16,
+        "fill": "#ffffff"
+      }
+    },
+    "style": {
+      "stroke": "#413960",
+      "fill": "#6154a5"
+    }
+  }
+}`
+
+	errGraph := json.Unmarshal([]byte(jsonGraph), &maps)
+	if errGraph != nil {
+		log.Println(fmt.Errorf("failed to Unmarshal json graph : %s", errGraph.Error()))
 	}
+	errStyle := json.Unmarshal([]byte(jsonStyle), &styles)
+	if errStyle != nil {
+		log.Println(fmt.Errorf("failed to Unmarshal json style : %s", errStyle.Error()))
+	}
+
 	log.Println(maps["node1"])
 	log.Println(maps["node1"].RelationD)
 	for _, v := range maps["node1"].RelationD {
@@ -241,24 +1697,34 @@ func main() {
 	items = append(items, Item{Node: "NodeName1", From: "NodeName1", Distance: 1})
 	log.Println(items)
 
-	UpMove("node4", maps, 2)
-	DownMove("node4", maps, 1)
+	UpMove("2020-C1_Lu-Ming Rice_Cheng-Po Hsu", maps, 2)
+	DownMove("2020-C1_Lu-Ming Rice_Cheng-Po Hsu", maps, 10)
+	GetNodeStyle(styles)
 	log.Println("This NodeSet: ", NodeSet)
-	log.Println(EdgeList)
-	// range即可窮盡取出nodeKey，不使用value，_
-	for k, _ := range NodeSet {
-		log.Print(k)
+	log.Println("This StyleSet", Style)
+
+	tjsonStyle, tsError := json.Marshal(Style)
+	if tsError != nil {
+		log.Println("style transformed error: ", tsError.Error())
+	} else {
+		log.Println("style json transformed: ", string(tjsonStyle))
 	}
 
+	//log.Println(EdgeList)
+	//// range即可窮盡取出nodeKey，不使用value，_
+	//for k, _ := range NodeSet {
+	//	log.Print(k)
+	//}
+
 	// golang中空結構是不佔用記憶體
-	type void struct{}
-	set := make(map[string]void)
-	set["a1"] = void{}
-	if _, ok := set["a2"]; !ok {
-		log.Println("The key is not existed")
-	}
-	if _, ok := set["a1"]; ok {
-		log.Println("The key is existed")
-	}
+	//type void struct{}
+	//set := make(map[string]void)
+	//set["a1"] = void{}
+	//if _, ok := set["a2"]; !ok {
+	//	log.Println("The key is not existed")
+	//}
+	//if _, ok := set["a1"]; ok {
+	//	log.Println("The key is existed")
+	//}
 
 }
