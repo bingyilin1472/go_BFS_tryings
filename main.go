@@ -48,8 +48,8 @@ type Item struct {
 	Distance int64
 }
 type Edge struct {
-	Source string
-	Target string
+	Source string `json:"source"`
+	Target string `json:"target"`
 }
 
 type NodeStyle struct {
